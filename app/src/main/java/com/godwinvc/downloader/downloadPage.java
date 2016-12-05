@@ -3,47 +3,36 @@ package com.godwinvc.downloader;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import com.android.volley.Cache;
-import com.android.volley.Network;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.DiskBasedCache;
-import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class downloadPage extends AppCompatActivity {
-    RequestQueue queue;
-    public String dataLink = "http://quicklearnsys.com/data/events.json";
+    public String jsonString;
+    public JSONObject jsonObject;
+    public JSONArray jsonArray;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_download_page);
         if (checkConnection()) {
-            getData();
-            populateAudios();
+            new RunBackground().execute();
         } else {
             Toast.makeText(getApplicationContext(), "No Network Connection", Toast.LENGTH_LONG).show();
         }
-    }
-
-    private void populateAudios() {
-        String[] audios = {"Audio 1", "Audio 2", "Audio 3"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.audio_items, audios);
-        ListView listView = (ListView) findViewById(R.id.audioListView);
-        listView.setAdapter(adapter);
     }
 
     private boolean checkConnection() {
@@ -55,41 +44,61 @@ public class downloadPage extends AppCompatActivity {
             return false;
         }
     }
-    public void getData (){
-        Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024);
-        Network network = new BasicNetwork(new HurlStack());
-        queue = new RequestQueue(cache,network);
-        queue.start();
-        final TextView displayResponse = (TextView) findViewById(R.id.dataDisplay);
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, dataLink,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        displayResponse.setText(processData(response));
-                        queue.stop();
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                displayResponse.setText("That didn't work!");
-            }
-        });
-        queue.add(stringRequest);
-    }
 
-    public String processData(String rawData){
-        String data = rawData;
-        try{
-            JSONArray jsonArray = new JSONArray(data);
-            String[] strArr = new String[jsonArray.length()];
-            for (int i =0; i < jsonArray.length();i++){
-                strArr[i] = jsonArray.getString(i);
-            }
-            data = strArr.toString();
-        }catch(JSONException err){
+    class RunBackground extends AsyncTask<Void, Void, String> {
+        public String dataLink;
 
+        @Override
+        protected void onPreExecute() {
+            dataLink = "http://godwinvc.com/android/downloader/data.json";
         }
 
-        return  data;
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                URL url = new URL(dataLink);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+                InputStream inputStream = httpURLConnection.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                StringBuilder stringBuilder = new StringBuilder();
+                while ((jsonString = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(jsonString + "\n");
+                }
+                bufferedReader.close();
+                inputStream.close();
+                httpURLConnection.disconnect();
+                return stringBuilder.toString().trim();
+            } catch (IOException e) {
+
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(String response) {
+            jsonString = response;
+            String audioName, downloadLink;
+            if (response == null) {
+                Toast.makeText(getApplicationContext(), "Unable to fetch", Toast.LENGTH_LONG).show();
+            } else {
+                try {
+                    jsonObject = new JSONObject(response);
+                    jsonArray = jsonObject.getJSONArray("audios");
+                    int count = 0;
+                    while (count < jsonObject.length()) {
+                        JSONObject anotherJsonObject = jsonArray.getJSONObject(count);
+                        audioName = anotherJsonObject.getString("name");
+                        downloadLink = anotherJsonObject.getString("downloadLink");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

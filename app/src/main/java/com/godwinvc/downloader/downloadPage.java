@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -23,6 +24,8 @@ public class downloadPage extends AppCompatActivity {
     public String jsonString;
     public JSONObject jsonObject;
     public JSONArray jsonArray;
+    public AudioAdapter audioAdapter;
+    public ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,16 +87,22 @@ public class downloadPage extends AppCompatActivity {
             jsonString = response;
             String audioName, downloadLink;
             if (response == null) {
-                Toast.makeText(getApplicationContext(), "Unable to fetch", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Unable to fetch data", Toast.LENGTH_LONG).show();
             } else {
                 try {
                     jsonObject = new JSONObject(response);
                     jsonArray = jsonObject.getJSONArray("audios");
+                    listView = (ListView) findViewById(R.id.audioListView);
+                    audioAdapter = new AudioAdapter(getApplicationContext(), R.layout.audio_items);
+                    listView.setAdapter(audioAdapter);
                     int count = 0;
                     while (count < jsonObject.length()) {
                         JSONObject anotherJsonObject = jsonArray.getJSONObject(count);
                         audioName = anotherJsonObject.getString("name");
                         downloadLink = anotherJsonObject.getString("downloadLink");
+                        Audios audios = new Audios(audioName,downloadLink);
+                        audioAdapter.add(audios);
+                        count++;
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="75sp"
     android:background="?android:attr/colorBackground">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/audioNameTextView"
         android:layout_width="200sp"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/button"
+        android:layout_alignBottom="@+id/audioDownloadButton"
         android:layout_alignParentTop="true"
         android:paddingLeft="10sp"
         android:paddingTop="8sp"
@@ -18,13 +18,13 @@
         android:typeface="sans" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/audioDownloadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:layout_marginEnd="18dp"
-        android:layout_toRightOf="@+id/textView"
+        android:layout_toRightOf="@+id/audioNameTextView"
         android:text="Download Audio" />;
     android:id="@+id/download_btn" />
 </RelativeLayout>

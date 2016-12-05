@@ -13,13 +13,6 @@
         <ListView
             android:id="@+id/audioListView"
             android:layout_width="match_parent"
-            android:layout_height="195dp"></ListView>
-
-        <TextView
-            android:id="@+id/dataDisplay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Godwin Vinny Carole" />
-
+            android:layout_height="wrap_content"></ListView>
     </LinearLayout>
 </ScrollView>

@@ -1,17 +1,14 @@
 package com.godwinvc.downloader;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.ListView;
+import android.view.View;
 import android.widget.Toast;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,10 +19,6 @@ import java.net.URL;
 
 public class downloadPage extends AppCompatActivity {
     public String jsonString;
-    public JSONObject jsonObject;
-    public JSONArray jsonArray;
-    public AudioAdapter audioAdapter;
-    public ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,29 +78,17 @@ public class downloadPage extends AppCompatActivity {
         @Override
         protected void onPostExecute(String response) {
             jsonString = response;
-            String audioName, downloadLink;
-            if (response == null) {
-                Toast.makeText(getApplicationContext(), "Unable to fetch data", Toast.LENGTH_LONG).show();
-            } else {
-                try {
-                    jsonObject = new JSONObject(response);
-                    jsonArray = jsonObject.getJSONArray("audios");
-                    listView = (ListView) findViewById(R.id.audioListView);
-                    audioAdapter = new AudioAdapter(getApplicationContext(), R.layout.audio_items);
-                    listView.setAdapter(audioAdapter);
-                    int count = 0;
-                    while (count < jsonObject.length()) {
-                        JSONObject anotherJsonObject = jsonArray.getJSONObject(count);
-                        audioName = anotherJsonObject.getString("name");
-                        downloadLink = anotherJsonObject.getString("downloadLink");
-                        Audios audios = new Audios(audioName,downloadLink);
-                        audioAdapter.add(audios);
-                        count++;
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
         }
+    }
+
+    public void parseJson(View v){
+       if(jsonString == null){
+            Toast.makeText(getApplicationContext(),"Unable to  fetch data from Server",Toast.LENGTH_LONG).show();
+        }else{
+            Intent intent= new Intent(this,DisplayListView.class);
+            intent.putExtra("jsonData", jsonString);
+            startActivity(intent);
+        }
+       // Toast.makeText(getApplicationContext(),"Unable to  fetch data from Server",Toast.LENGTH_LONG).show();
     }
 }

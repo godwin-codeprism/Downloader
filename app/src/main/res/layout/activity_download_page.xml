@@ -9,10 +9,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-
-        <ListView
-            android:id="@+id/audioListView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"></ListView>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Search for Audios"
+            android:gravity="center"
+            android:layout_gravity="center_horizontal"
+            android:onClick="parseJson"
+            />
     </LinearLayout>
 </ScrollView>

@@ -1,7 +1,9 @@
 package com.godwinvc.downloader;
 
 import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.view.LayoutInflater;
@@ -12,6 +14,7 @@ import android.webkit.URLUtil;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +24,7 @@ import java.util.List;
  */
 
 public class AudioAdapter extends ArrayAdapter {
-    List list = new ArrayList();
+    private List list = new ArrayList();
 
     public AudioAdapter(Context context, int resource) {
         super(context, resource);
@@ -69,7 +72,7 @@ public class AudioAdapter extends ArrayAdapter {
                 request.setDescription(audios.getName() + " is being downloaded");
                 request.allowScanningByMediaScanner();
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                String downloadingAudioName = URLUtil.guessFileName(audios.getDownloadLink(),null, MimeTypeMap.getFileExtensionFromUrl(audios.getDownloadLink()));
+                String downloadingAudioName = URLUtil.guessFileName(audios.getDownloadLink(), null, MimeTypeMap.getFileExtensionFromUrl(audios.getDownloadLink()));
                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC, downloadingAudioName);
                 DownloadManager manager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
                 manager.enqueue(request);
@@ -82,5 +85,15 @@ public class AudioAdapter extends ArrayAdapter {
         TextView audioName;
         Button downloadBtn;
 
+    }
+
+    public static class IsDownloadComplete extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                Toast.makeText(context,"Download Complete",Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

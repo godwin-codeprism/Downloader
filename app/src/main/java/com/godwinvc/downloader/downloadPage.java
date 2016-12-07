@@ -2,7 +2,6 @@ package com.godwinvc.downloader;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -11,8 +10,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
+import android.widget.ListView;
 import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,12 +26,18 @@ import java.net.URL;
 
 public class downloadPage extends AppCompatActivity {
     public String jsonString;
+    JSONObject jsonObject;
+    JSONArray jsonArray;
+    AudioAdapter audioAdapter;
     private static final int PERMS_REQUEST_CODE = 3885;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_download_page);
+        ListView listView = (ListView) findViewById(R.id.listViewMain);
+        audioAdapter = new AudioAdapter(this,R.layout.audio_items);
+        listView.setAdapter(audioAdapter);
         if (checkConnection()) {
             new RunBackground().execute();
         } else {
@@ -86,18 +95,34 @@ public class downloadPage extends AppCompatActivity {
         @Override
         protected void onPostExecute(String response) {
             jsonString = response;
+            parseJson();
         }
     }
 
-    public void parseJson(View v){
+    public void parseJson(){
        if(jsonString == null){
             Toast.makeText(getApplicationContext(),"Unable to  fetch data from Server",Toast.LENGTH_LONG).show();
         }else{
-            Intent intent= new Intent(this,DisplayListView.class);
+            /*Intent intent= new Intent(this,DisplayListView.class);
             intent.putExtra("jsonData", jsonString);
-            startActivity(intent);
+            startActivity(intent);*/
+           try {
+               jsonObject = new JSONObject(jsonString);
+               jsonArray = jsonObject.getJSONArray("audios");
+               int count = 0;
+               String name, downloadLink;
+               while (count < jsonArray.length()) {
+                   JSONObject JO = jsonArray.getJSONObject(count);
+                   name = JO.getString("name");
+                   downloadLink = JO.getString("downloadLink");
+                   Audios audios = new Audios(name, downloadLink);
+                   audioAdapter.add(audios);
+                   count++;
+               }
+           } catch (JSONException e) {
+               e.printStackTrace();
+           }
         }
-       // Toast.makeText(getApplicationContext(),"Unable to  fetch data from Server",Toast.LENGTH_LONG).show();
     }
     public void requestPermissions(){
         String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};

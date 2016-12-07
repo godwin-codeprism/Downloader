@@ -21,7 +21,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DisplayListView"></activity>
         <receiver android:name=".AudioAdapter$IsDownloadComplete">
             <intent-filter>
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>

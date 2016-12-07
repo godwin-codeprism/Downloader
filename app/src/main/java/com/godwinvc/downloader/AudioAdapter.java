@@ -100,23 +100,8 @@ public class AudioAdapter extends ArrayAdapter {
             }
         }
     }
-/*    public  boolean isStoragePermissionGranted() {
-        if(Build.VERSION.SDK_INT >= 23){
-            if(getContext().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
-                Toast.makeText(getContext(),"Write permissions granted",Toast.LENGTH_LONG).show();
-                return true;
-            }else {
-                Toast.makeText(getContext(),"Write permissions revoked by user",Toast.LENGTH_LONG).show();
-                return false;
-            }
-        }else{
-            Toast.makeText(getContext(),"Download Started",Toast.LENGTH_LONG).show();
-            return true;
-        }
-    }*/
 private boolean checkWriteExternalPermission()
 {
-
     String permission = "android.permission.WRITE_EXTERNAL_STORAGE";
     int res = getContext().checkCallingOrSelfPermission(permission);
     return (res == PackageManager.PERMISSION_GRANTED);

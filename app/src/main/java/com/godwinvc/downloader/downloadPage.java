@@ -1,11 +1,15 @@
 package com.godwinvc.downloader;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
@@ -19,6 +23,7 @@ import java.net.URL;
 
 public class downloadPage extends AppCompatActivity {
     public String jsonString;
+    private static final int PERMS_REQUEST_CODE = 3885;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +33,9 @@ public class downloadPage extends AppCompatActivity {
             new RunBackground().execute();
         } else {
             Toast.makeText(getApplicationContext(), "No Network Connection", Toast.LENGTH_LONG).show();
+        }
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            requestPermissions();
         }
     }
 
@@ -90,5 +98,28 @@ public class downloadPage extends AppCompatActivity {
             startActivity(intent);
         }
        // Toast.makeText(getApplicationContext(),"Unable to  fetch data from Server",Toast.LENGTH_LONG).show();
+    }
+    public void requestPermissions(){
+        String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            requestPermissions(permissions,3885);
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+        boolean allowed = true;
+        switch (requestCode){
+            case PERMS_REQUEST_CODE:
+                for(int res: grantResults){
+                    allowed = allowed && (res == PackageManager.PERMISSION_GRANTED);
+                }
+                break;
+            default:
+                allowed = false;
+                break;
+        }
+        if(!allowed){
+            Toast.makeText(getApplicationContext(),"Can't download without permissions",Toast.LENGTH_LONG).show();
+        }
     }
 }

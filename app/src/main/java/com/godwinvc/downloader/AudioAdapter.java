@@ -4,6 +4,7 @@ import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.view.LayoutInflater;
@@ -25,7 +26,6 @@ import java.util.List;
 
 public class AudioAdapter extends ArrayAdapter {
     private List list = new ArrayList();
-
     public AudioAdapter(Context context, int resource) {
         super(context, resource);
     }
@@ -67,15 +67,19 @@ public class AudioAdapter extends ArrayAdapter {
         audioHolder.downloadBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(audios.getDownloadLink()));
-                request.setTitle(audios.getName());
-                request.setDescription(audios.getName() + " is being downloaded");
-                request.allowScanningByMediaScanner();
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                String downloadingAudioName = URLUtil.guessFileName(audios.getDownloadLink(), null, MimeTypeMap.getFileExtensionFromUrl(audios.getDownloadLink()));
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC, downloadingAudioName);
-                DownloadManager manager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
-                manager.enqueue(request);
+                if(checkWriteExternalPermission()){
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(audios.getDownloadLink()));
+                    request.setTitle(audios.getName());
+                    request.setDescription(audios.getName() + " is being downloaded");
+                    request.allowScanningByMediaScanner();
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    String downloadingAudioName = URLUtil.guessFileName(audios.getDownloadLink(), null, MimeTypeMap.getFileExtensionFromUrl(audios.getDownloadLink()));
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC, downloadingAudioName);
+                    DownloadManager manager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
+                    manager.enqueue(request);
+                }else{
+                    Toast.makeText(getContext(),"Can't download without writing permissions",Toast.LENGTH_LONG).show();
+                }
             }
         });
         return row;
@@ -96,4 +100,25 @@ public class AudioAdapter extends ArrayAdapter {
             }
         }
     }
+/*    public  boolean isStoragePermissionGranted() {
+        if(Build.VERSION.SDK_INT >= 23){
+            if(getContext().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+                Toast.makeText(getContext(),"Write permissions granted",Toast.LENGTH_LONG).show();
+                return true;
+            }else {
+                Toast.makeText(getContext(),"Write permissions revoked by user",Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }else{
+            Toast.makeText(getContext(),"Download Started",Toast.LENGTH_LONG).show();
+            return true;
+        }
+    }*/
+private boolean checkWriteExternalPermission()
+{
+
+    String permission = "android.permission.WRITE_EXTERNAL_STORAGE";
+    int res = getContext().checkCallingOrSelfPermission(permission);
+    return (res == PackageManager.PERMISSION_GRANTED);
+}
 }
